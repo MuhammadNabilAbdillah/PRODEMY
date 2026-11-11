@@ -21,7 +21,7 @@ export default function PublicShell({ children, back = '/', backText = 'Beranda'
         {nav}
         <div className="sp">
           {right}
-          {back && <Link className="btn glass sm" to={back}><i className="bi bi-arrow-left" /> {backText}</Link>}
+          {back && <Link className="btn glass sm" to={back} title={backText} aria-label={backText}><i className="bi bi-arrow-left" /> {backText}</Link>}
           <ThemeBtn />
         </div>
       </div>

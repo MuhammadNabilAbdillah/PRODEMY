@@ -22,7 +22,7 @@ export default function PortalLayout() {
 
   if (!name || !birth) return <Navigate to="/masuk" replace />;
 
-  const exit = <button type="button" className="btn glass sm" onClick={logout}><i className="bi bi-box-arrow-left" /> Keluar</button>;
+  const exit = <button type="button" className="btn glass sm" onClick={logout} title="Keluar" aria-label="Keluar"><i className="bi bi-box-arrow-left" /> Keluar</button>;
 
   if (loading) return <PublicShell back={null} right={exit}><div className="empty">Memuat data...</div></PublicShell>;
   if (error) return (

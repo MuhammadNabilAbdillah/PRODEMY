@@ -1,0 +1,286 @@
+/* =====================================================================
+   RESPONSIF: laptop, tablet, HP
+   Dimuat paling akhir (lihat main.jsx) supaya menimpa aturan lama.
+   Titik patah: 1100 (laptop kecil), 900 (tablet), 720 (HP besar), 560 (HP), 400 (HP kecil)
+   ===================================================================== */
+
+/* ---------- dasar ---------- */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh;overflow-x:clip;-webkit-tap-highlight-color:transparent}
+#root{min-height:100vh;min-height:100dvh;max-width:100%}
+img,svg,video{max-width:100%}
+.login,.pub{min-height:100vh;min-height:100dvh}
+.side{height:100vh;height:100dvh}
+button,.btn,.tab,.date,a.btn{touch-action:manipulation}
+
+/* laptop lebar: isi halaman admin dipusatkan agar tidak melebar berlebihan */
+main{--px:40px;width:100%;max-width:1520px;margin-left:auto;margin-right:auto}
+.side-back{display:none}
+
+/* ---------- laptop kecil ---------- */
+@media(max-width:1100px){
+  main{--px:28px;padding-left:var(--px);padding-right:var(--px)}
+  .g4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g3{grid-template-columns:1fr 1fr}
+}
+
+/* ---------- tablet & HP: menu samping jadi laci ---------- */
+@media(max-width:900px){
+  main{--px:18px;padding:0 var(--px) calc(40px + env(safe-area-inset-bottom,0px))}
+
+  .side{
+    left:0;width:min(84vw,300px);transform:translateX(-105%);visibility:hidden;
+    transition:transform .24s cubic-bezier(.2,.8,.2,1),visibility 0s .24s;
+    z-index:40;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  }
+  .side.open{transform:none;visibility:visible;transition:transform .24s cubic-bezier(.2,.8,.2,1),visibility 0s}
+  .side nav a{padding:12px 14px}               /* sasaran sentuh lebih besar */
+  .side nav a.on:before{left:-14px}
+  .side-back{display:block;position:fixed;inset:0;z-index:35;background:rgba(4,12,7,.55);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);animation:pop-fade .2s ease-out}
+
+  /* bilah judul menempel di atas saat halaman digulir */
+  .top{
+    position:sticky;top:0;z-index:20;gap:12px;flex-wrap:wrap;
+    margin:0 calc(-1 * var(--px)) 18px;padding:calc(12px + env(safe-area-inset-top,0px)) var(--px) 12px;
+    background:color-mix(in srgb,var(--bg) 90%,transparent);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--line);
+  }
+  .top>div:not(.tools){flex:1;min-width:0}
+  .top h1{font-size:28px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top p{font-size:12px;line-height:1.35}
+  .burger{flex:none;display:grid;place-items:center;width:44px;height:44px;cursor:pointer}
+  /* kolom pencarian pindah ke baris sendiri */
+  .tools{display:contents}
+  .theme{order:2;flex:none}
+  .bell{order:3;font-size:12.5px;padding:7px 12px}
+  .search{order:5;flex:1 0 100%}
+  .search input{width:100%}
+
+  .g2,.g3{grid-template-columns:1fr}
+  .grid.g4{gap:14px}
+  .form{grid-template-columns:1fr 1fr}
+
+  /* tabel di tablet: bisa digeser ke samping, kepala tabel tetap rapi */
+  table{display:table;min-width:580px}
+  .card:has(table){overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .mtabs{max-width:100%;overflow-x:auto}
+}
+
+/* ---------- HP besar: tabel berubah menjadi kartu ---------- */
+@media(max-width:720px){
+  main .card:has(>table),.pub-main .card:has(>table){padding:0!important;background:none;border:0;box-shadow:none;overflow:visible!important}
+  table{display:block;min-width:0;width:100%}
+  thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  tbody{display:block}
+  tr,tbody tr{display:block;margin-bottom:12px;padding:6px 16px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+  tr:last-child{margin-bottom:0}
+  td{
+    display:block;position:relative;min-height:38px;
+    padding:10px 0 10px 40%;text-align:left;
+    border-bottom:1px dashed var(--line);overflow-wrap:anywhere;
+  }
+  tr:last-child td{border-bottom:1px dashed var(--line)}
+  td:last-child,tr:last-child td:last-child{border-bottom:0}
+  table tr:hover td,tbody tr:hover td{background:none}
+  td:before{
+    content:attr(data-label);position:absolute;left:0;top:11px;width:36%;
+    color:var(--mut);font-size:12.5px;font-weight:700;line-height:1.3;
+  }
+  /* kolom pertama = identitas, tampil sebagai judul kartu */
+  td:first-child{padding-left:0;padding-top:12px;border-bottom:1px solid var(--line)}
+  td:first-child:before{display:none}
+  /* kolom terakhir tanpa judul = deretan tombol */
+  td[data-label=""]{padding-left:0;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  td[data-label=""]:before{display:none}
+  td[data-label=""]>*{margin:0!important}
+  td[data-label=""] .btn{flex:1 1 auto}
+  td[data-label=""]:empty{display:none}
+  /* baris "belum ada data" */
+  td[colspan]{padding:6px 0;text-align:center;display:block;border:0}
+  td[colspan]:before{display:none}
+  tr:has(>td[colspan]){background:var(--surface)}
+
+  /* menu tarik-turun Download PDF selebar baris */
+  .bar{position:relative}
+  .dd{position:static}
+  .dd .menu{left:0;right:0;top:calc(100% + 6px);min-width:0;max-width:none}
+  /* form "Tandai lunas" tidak lagi melayang */
+  details.pay{display:block;flex:1 1 100%}
+  details.pay summary{display:flex;width:100%}
+  details.pay form{position:static;width:100%;margin-top:8px;box-shadow:none;background:var(--soft)}
+
+  .form{grid-template-columns:1fr}
+  .grid.g4{grid-template-columns:1fr 1fr}
+}
+
+/* ---------- HP ---------- */
+@media(max-width:560px){
+  main{--px:14px}
+  body{font-size:14px}
+  .card{padding:16px;border-radius:18px}
+  .card h3{font-size:15px;margin-bottom:12px}
+  .card h3.disp{font-size:20px}
+  .top h1{font-size:25px}
+  .bell{display:none}
+
+  /* kolom isian dan tombol */
+  input,select{font-size:16px;min-height:48px}       /* 16px mencegah iOS memperbesar layar saat mengetik */
+  .btn{min-height:44px}
+  .btn.sm{min-height:38px;padding:7px 13px}
+  .bar{gap:8px}
+  .bar>input,.bar>select,.bar>.btn,.bar>.dd,.bar>a.btn{flex:1 1 calc(50% - 4px);min-width:0}
+  .bar>form,.bar>.search{flex:1 1 100%}
+  .bar>.sp{display:flex!important;flex-wrap:wrap;gap:8px!important;width:100%;margin-left:0}
+  .bar>.sp>*{flex:1 1 calc(50% - 4px);min-width:0}
+  .bar>.sp .btn,.bar>.sp summary{width:100%}
+  .bar>span:not(.sp){flex:1 1 100%;font-size:13px}
+  .bar>.btn.sp{flex:1 1 100%}
+
+  /* tab kategori: satu baris yang bisa digeser */
+  .tabs{flex-wrap:nowrap;overflow-x:auto;margin-left:calc(-1 * var(--px));margin-right:calc(-1 * var(--px));padding:2px var(--px) 8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;white-space:nowrap;padding:9px 16px}
+  /* pilihan tanggal absensi: geser ke samping */
+  .bar:has(>.date){flex-wrap:nowrap;overflow-x:auto;margin-left:calc(-1 * var(--px));margin-right:calc(-1 * var(--px));padding:2px var(--px) 8px;scrollbar-width:none}
+  .bar:has(>.date)::-webkit-scrollbar{display:none}
+  .date{flex:none;min-width:70px}
+
+  /* baris absensi: nama di atas, empat tombol status sama lebar di bawahnya */
+  .bd:has(.st){flex-direction:column;align-items:stretch;gap:10px}
+  .bd>.who{min-width:0!important;flex:1 1 auto!important}
+  .st{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;width:100%}
+  .st label{text-align:center;padding:10px 2px;font-size:12.5px}
+  .bd .tag{margin-left:0}
+
+  /* kartu angka */
+  .stat .n{font-size:40px}
+  .stat .n[style]{font-size:24px!important;line-height:1.2}
+  .stat span{font-size:12.5px}
+
+  /* kartu coach 1 kolom penuh, galeri murid lebih rapat */
+  .cgrid{grid-template-columns:1fr}
+  .prof-name{font-size:26px}
+  .mini{grid-template-columns:1fr 1fr}
+  .kv{grid-template-columns:1fr;gap:2px}
+  .kv dt{margin-top:8px;font-size:12.5px}
+  .fact .btn,.bk-acts .btn,.set-submit{flex:1 1 100%}
+  .acc{grid-template-columns:auto minmax(0,1fr)}
+  .acc-acts{grid-column:1/-1}
+  .acc-acts .pw{max-width:none;flex:1 1 100%}
+  .set{gap:28px}
+  .set-head h2{font-size:26px}
+  .pk-acts .btn{flex:1 1 auto}
+
+  /* kolom pencarian tabel & popup */
+  .pop-acts{flex-direction:column-reverse}
+  #offbar{bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+
+  /* dashboard admin */
+  .hero{border-radius:24px;gap:22px}
+  .hero-name{font-size:52px}
+  .hero-sched .fx{flex:1 1 calc(50% - 5px)}
+  .hero .acts .btn{flex:1 1 100%}
+  .hero-big b{font-size:84px}
+  .cats{gap:8px}
+  .cat{padding:16px 10px 12px}
+  .cat b{font-size:40px}
+  .cat span{font-size:14px}
+  .kn{font-size:48px}
+  .chart-head h3{font-size:22px}
+  .att{align-items:flex-start;flex-wrap:wrap}
+  .att>a{margin-left:23px}
+  .banner{padding:22px;border-radius:20px}
+  .banner .acts{margin-left:0;width:100%}
+  .banner .acts .btn{flex:1}
+}
+
+/* ---------- HP kecil ---------- */
+@media(max-width:400px){
+  main{--px:12px}
+  .grid.g4{grid-template-columns:1fr}
+  .bar>input,.bar>select,.bar>.btn,.bar>.dd,.bar>a.btn,.bar>.sp>*{flex-basis:100%}
+  .cat b{font-size:34px}
+}
+
+/* =====================================================================
+   PORTAL ORANG TUA
+   ===================================================================== */
+.pub-main{padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px))}
+.pub .card{margin-bottom:var(--gap,18px)}
+.pub .pd .card,.pub .pb-two .card,.pub .pb-kpis .card{margin-bottom:0}
+
+@media(max-width:900px){
+  .pub-top{padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;gap:10px 12px}
+  .pub-top .sp{margin-left:auto}
+  .pub-nav{order:3;width:100%;margin:0;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:6px}
+  .pub-nav::-webkit-scrollbar{display:none}
+  .pub-nav a{flex:1 1 auto;justify-content:center;white-space:nowrap;padding:10px 12px;font-size:13.5px}
+  .pub-main{padding:20px 16px calc(48px + env(safe-area-inset-bottom,0px))}
+  .pb-chart-row{justify-content:center}
+  .pb-prof-chips{margin-top:2px}
+}
+@media(max-width:560px){
+  .pub-main{padding:16px 14px calc(40px + env(safe-area-inset-bottom,0px))}
+  .brand-m b{font-size:19px}
+  .pb-head{margin-bottom:16px}
+  .pb-head h1,.pb-enter h1{font-size:30px}
+  .pb-done,.pb-enter{padding:26px 18px;margin:8px auto}
+  .pb-done h2{font-size:32px}
+  .pb-acts .btn,.pb-wa .btn{flex:1 1 100%}
+  .pb-bankno span{font-size:26px}
+  .pb-bankno .btn{width:100%}
+  .pb-kids{flex-direction:column}
+  .pb-kid{width:100%}
+  .pb-photo{align-items:flex-start}
+  .pb-photo input{flex:1 1 100%;min-width:0}
+  .pb-submit{min-height:50px}
+  .pb-sumline,.pb-total{font-size:14px}
+  .pb-total b{font-size:30px}
+  .pb-tabs{flex-wrap:nowrap;overflow-x:auto;margin-left:-14px;margin-right:-14px;padding:2px 14px 6px;scrollbar-width:none}
+  .pb-tabs::-webkit-scrollbar{display:none}
+  .pb-tabs button{flex:none;white-space:nowrap}
+  .pb-legend.row{flex-wrap:wrap;gap:10px 16px}
+  .pb-donut{width:140px;height:140px}
+  .land-in{padding:36px 4px 28px}
+  .land-card{padding:22px 16px}
+  .land-card b{font-size:26px}
+  .ph{gap:16px}
+  .ph-top{flex-direction:column;align-items:flex-start}
+  .ph-acts .btn{flex:1 1 100%}
+  .ph-bday{font-size:13.5px}
+  .ph-cal{width:58px;height:62px}
+  .ph-cal b{font-size:30px}
+  .ph-next-row b{font-size:17px}
+  .pi{padding:14px}
+  .pi-ico{width:40px;height:40px}
+  .kp{padding:15px}
+  .kp b{font-size:40px}
+  .wk{gap:4px}
+  .wk span{padding:8px 0;font-size:11.5px;border-radius:10px}
+  .pay-state{flex-direction:column;align-items:flex-start}
+  .pay-list li{flex-wrap:wrap}
+  .tl li{grid-template-columns:auto minmax(0,1fr)}
+  .tl li>:last-child{grid-column:2}
+  .sheet-foot{flex-direction:column-reverse}
+  .sheet-foot .btn{width:100%}
+  .sheet-body{padding-bottom:18px}
+}
+/* tombol Keluar / Beranda di bilah atas portal jadi ikon saja di HP */
+@media(max-width:480px){
+  .pub-top .sp{gap:8px}
+  .pub-top .sp .btn.glass{font-size:0;gap:0;width:40px;height:40px;min-height:0;padding:0;border-radius:12px}
+  .pub-top .sp .btn.glass i{font-size:17px;margin:0}
+  .pub-top .theme{width:40px;height:40px}
+}
+@media(max-width:400px){
+  .pd-info{grid-template-columns:1fr}
+  .pb-kpis{gap:10px}
+  .kp b{font-size:36px}
+  .ph-name{font-size:36px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .side,.side.open{transition:none!important}
+  .side-back{animation:none!important}
+}

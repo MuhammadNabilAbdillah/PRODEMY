@@ -31,6 +31,14 @@ export default function Layout() {
   const [pendingProofs, setPendingProofs] = useState(0);
 
   useEffect(() => { const t = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(t); }, []);
+  // menu samping (HP): tutup saat pindah halaman, kunci gulir latar saat terbuka, tutup dengan tombol Esc
+  useEffect(() => { setOpen(false); }, [loc.pathname]);
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', onKey); };
+  }, [open]);
   // jumlah bukti pembayaran dari orang tua yang menunggu verifikasi (dihitung ulang tiap pindah halaman)
   useEffect(() => {
     supabase.from('payment_submissions').select('id', { count: 'exact', head: true }).eq('status', 'menunggu')
@@ -45,6 +53,7 @@ export default function Layout() {
 
   return (
     <TitleCtx.Provider value={setTitle}>
+      {open && <div className="side-back" onClick={() => setOpen(false)} aria-hidden="true" />}
       <aside className={`side${open ? ' open' : ''}`} onClick={() => setOpen(false)}>
         <div className="brand">
           <span className="logo-tile"><img src="/images/logo.png" alt="" /></span>
@@ -84,7 +93,7 @@ export default function Layout() {
 
       <main>
         <header className="top">
-          <button className="burger" onClick={() => setOpen((o) => !o)}><i className="bi bi-list" /></button>
+          <button type="button" className="burger" onClick={() => setOpen((o) => !o)} aria-label="Buka menu" aria-expanded={open}><i className="bi bi-list" /></button>
           <div>
             <h1 className="disp">{title}</h1>
             <p>{fmtDate.format(now)} · <b>{fmtClock.format(now).replace(/:/g, '.')}</b> WITA</p>
