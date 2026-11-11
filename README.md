@@ -56,3 +56,8 @@ Pengunjung tidak punya akses langsung ke tabel. Mereka hanya memanggil fungsi `p
 
 ### Foto
 Batas ukuran foto 5 MB (aplikasi menolak file lebih besar dan mengecilkan foto sebelum diunggah). Orang tua bisa mengganti foto anak lewat tombol **Ubah profil & foto** di dashboard.
+
+
+## Masuk portal orang tua: nama lengkap + tanggal lahir
+Halaman "Sudah Mendaftar" meminta **nama lengkap dan tanggal lahir anak**. Keduanya harus cocok dengan data pendaftaran, sehingga anak yang namanya sama tidak membuka data orang lain.
+Jalankan `supabase/migrations/20260107000000_portal_verify_birth.sql` di SQL Editor (sekali saja, setelah migrasi 20260106). File ini juga menghapus fungsi lama yang hanya memakai nama.

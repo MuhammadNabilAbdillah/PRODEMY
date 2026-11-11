@@ -69,11 +69,15 @@ export function nextTraining(category) {
 }
 export const whenLabel = (inDays) => (inDays === 0 ? 'Hari ini' : inDays === 1 ? 'Besok' : `${inDays} hari lagi`);
 
-// ---------- nama anak yang tersimpan di perangkat (pengganti login) ----------
-const KEY = 'prodemy-portal-name';
-export const getSavedName = () => { try { return localStorage.getItem(KEY) || ''; } catch { return ''; } };
-export const saveName = (n) => { try { localStorage.setItem(KEY, n); } catch { /* abaikan */ } };
-export const clearName = () => { try { localStorage.removeItem(KEY); } catch { /* abaikan */ } };
+// ---------- identitas masuk yang tersimpan di perangkat (pengganti login) ----------
+// Masuk memakai nama lengkap DAN tanggal lahir anak, supaya anak yang namanya sama tidak membuka data orang lain.
+const KEY = 'prodemy-portal-login';
+const readSaved = () => { try { const v = JSON.parse(localStorage.getItem(KEY) || 'null'); return v && v.name && v.birth ? v : null; } catch { return null; } };
+export const getSavedName = () => readSaved()?.name || '';
+export const getSavedBirth = () => readSaved()?.birth || '';
+export const saveName = (name, birth) => { try { localStorage.setItem(KEY, JSON.stringify({ name, birth })); } catch { /* abaikan */ } };
+export const clearName = () => { try { localStorage.removeItem(KEY); localStorage.removeItem('prodemy-portal-name'); } catch { /* abaikan */ } };
+const sameName = (a, b) => String(a || '').trim().toLowerCase().replace(/\s+/g, ' ') === String(b || '').trim().toLowerCase().replace(/\s+/g, ' ');
 
 // ---------- panggilan ke Supabase (hanya lewat fungsi yang aman) ----------
 export async function registerFamily({ parent, plan, kids, onPhoto }) {
@@ -103,14 +107,15 @@ export async function registerFamily({ parent, plan, kids, onPhoto }) {
  * Orang tua mengubah profil anak (tanpa login; kuncinya nama anak yang dipakai masuk).
  * Nomor HP dan pekerjaan "hanya tulis": kosong = tidak diubah, dan tidak pernah dikirim balik ke portal.
  */
-export async function updateProfile({ name, id, parentName, birthDate, phone, job, photo }) {
+export async function updateProfile({ name, id, parentName, birthDate, phone, job, photo, childName, childBirth }) {
+  const birth = getSavedBirth();
   let path = null, avatar = null;
   if (photo) {
     avatar = await makeAvatar(photo);
     path = await upload('photos', 'registrations', await compressImage(photo));
   }
   const { error } = await supabase.rpc('portal_update_profile', {
-    p_name: name, p_id: id,
+    p_name: name, p_birth: birth, p_id: id,
     p_parent_name: parentName?.trim() || null,
     p_birth_date: birthDate || null,
     p_parent_phone: phone?.trim() || null,
@@ -118,6 +123,8 @@ export async function updateProfile({ name, id, parentName, birthDate, phone, jo
     p_photo: path, p_avatar: avatar,
   });
   if (error) throw error;
+  // bila yang diubah adalah anak yang dipakai untuk masuk, tanggal lahir tersimpan di perangkat ikut diperbarui
+  if (birthDate && childBirth === birth && sameName(childName, name)) saveName(name, birthDate);
 }
 
 /** Unggah bukti transfer lalu kirim ke admin (status awal: menunggu verifikasi) */
@@ -126,14 +133,14 @@ export async function submitPayment({ name, studentIds, period, amount, file, no
   if (file.size > PROOF_MAX_MB * 1024 * 1024) throw new Error(`Ukuran file maksimal ${PROOF_MAX_MB} MB.`);
   const proof = await upload('proofs', 'submissions', file);
   const { data, error } = await supabase.rpc('portal_submit_payment', {
-    p_name: name, p_student_ids: studentIds, p_period: period, p_amount: amount, p_proof: proof, p_note: note || null,
+    p_name: name, p_birth: getSavedBirth(), p_student_ids: studentIds, p_period: period, p_amount: amount, p_proof: proof, p_note: note || null,
   });
   if (error) throw error;
   return data;
 }
 
-export async function loadPortal(name) {
-  const { data, error } = await supabase.rpc('portal_data', { p_name: name });
+export async function loadPortal(name, birth) {
+  const { data, error } = await supabase.rpc('portal_data', { p_name: name, p_birth: birth });
   if (error) throw error;
   return data || { children: [] };
 }

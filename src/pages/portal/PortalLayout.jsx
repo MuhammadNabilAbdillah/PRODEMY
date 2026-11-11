@@ -11,12 +11,16 @@ export const usePortal = () => useOutletContext();
 export default function PortalLayout() {
   const nav = useNavigate();
   const name = P.getSavedName();
+  const birth = P.getSavedBirth();
   const [childId, setChildId] = useState(null);
-  const { data, loading, error, reload, refresh } = useData(() => (name ? P.loadPortal(name) : Promise.resolve(null)), [name]);
+  const { data, loading, error, reload, refresh } = useData(() => {
+    const n = P.getSavedName(), b = P.getSavedBirth(); // dibaca saat dipanggil, supaya tanggal lahir yang baru diubah ikut terbaca
+    return n && b ? P.loadPortal(n, b) : Promise.resolve(null);
+  }, [name, birth]);
 
   const logout = () => { P.clearName(); nav('/', { replace: true }); };
 
-  if (!name) return <Navigate to="/masuk" replace />;
+  if (!name || !birth) return <Navigate to="/masuk" replace />;
 
   const exit = <button type="button" className="btn glass sm" onClick={logout}><i className="bi bi-box-arrow-left" /> Keluar</button>;
 
@@ -32,7 +36,7 @@ export default function PortalLayout() {
     <PublicShell back={null}>
       <div className="card pb-enter">
         <h1 className="disp">Data tidak ditemukan</h1>
-        <p className="pb-mut">Nama “{name}” tidak ada di data academy. Tulis ulang nama lengkap anak.</p>
+        <p className="pb-mut">Nama dan tanggal lahir yang tersimpan tidak cocok dengan data academy. Masuk ulang dengan nama lengkap dan tanggal lahir anak.</p>
         <button className="btn" onClick={logout}>Kembali</button>
       </div>
     </PublicShell>

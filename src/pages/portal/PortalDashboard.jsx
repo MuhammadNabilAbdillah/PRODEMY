@@ -81,7 +81,7 @@ function EditProfile({ child, loginName, onClose, onSaved }) {
     if (Object.keys(er).length) return;
     setBusy(true);
     try {
-      await P.updateProfile({ name: loginName, id: child.id, parentName: f.parentName, birthDate: f.birthDate, phone: f.phone, job: f.job, photo });
+      await P.updateProfile({ name: loginName, id: child.id, parentName: f.parentName, birthDate: f.birthDate, phone: f.phone, job: f.job, photo, childName: child.name, childBirth: child.birth_date });
       await onSaved();
       toast('Profil berhasil diperbarui.');
       onClose();

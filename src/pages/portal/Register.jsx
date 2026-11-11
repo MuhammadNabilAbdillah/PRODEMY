@@ -47,7 +47,7 @@ export default function Register() {
     setBusy(true);
     try {
       const res = await P.registerFamily({ parent, plan, kids, onPhoto: (key, path) => setKid(key, 'photo_path', path) });
-      P.saveName(res.children[0].name);
+      P.saveName(res.children[0].name, kids[0].birth_date);
       setDone({ ...res, plan, quote: P.quote(plan, res.count) });
       window.scrollTo({ top: 0 });
     } catch (x) { toast.error(P.cleanErr(x)); } finally { setBusy(false); }
